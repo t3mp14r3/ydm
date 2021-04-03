@@ -1,3 +1,82 @@
 #!/bin/bash
 
-([[ $# != "5" ]] && echo "Usage: ydm <youtube link> <artist> <title> <album> <download dir>") || ([[ $# == "5" ]] && youtube-dl -o "$5/$2-$3.m4a" -f 140 $1 && taffy -r "$2" -t "$3" -l "$4" "$5/$2-$3.m4a")
+echo
+echo '                 $$\               '
+echo '                 $$ |              '
+echo ' $$\   $$\  $$$$$$$ |$$$$$$\$$$$\  '
+echo ' $$ |  $$ |$$  __$$ |$$  _$$  _$$\ '
+echo ' $$ |  $$ |$$ /  $$ |$$ / $$ / $$ |'
+echo ' $$ |  $$ |$$ |  $$ |$$ | $$ | $$ |'
+echo ' \$$$$$$$ |\$$$$$$$ |$$ | $$ | $$ |'
+echo '  \____$$ | \_______|\__| \__| \__|'
+echo ' $$\   $$ |                        '
+echo ' \$$$$$$  |                        '
+echo '  \______/                         '
+echo
+echo
+
+# Check if youtube-dl and taffy are on the system
+if ! command -v youtube-dl &> /dev/null;
+then
+	echo "Please, install youtube-dl!" && exit
+fi
+
+if ! command -v taffy &> /dev/null;
+then
+	echo "Please, install taffy" && exit
+fi
+
+# Request a YouTube link to the video, check if it's there
+read -p ' YouTube link: ' link
+[ ${#link} = 0 ] && echo -e '\n Error: Link is required!' && exit
+
+echo
+echo ' # Please enter some metadata for tagging, or leave it blank.'
+echo
+
+# Read Tag names
+read -p ' Artist: ' artist
+[ ${#artist} = 0 ] && artist="--no-artist" || artist="-r $(printf '%q' "$artist")"
+
+read -p ' Album: ' album
+[ ${#album} = 0 ] && album="--no-album" || album="-l $(printf '%q' "$album")"
+
+# Also, write a file name if title is given
+filename=''
+read -p ' Title: ' title
+[ ${#title} != 0 ] && visual_title="$title"
+[ ${#title} = 0 ] && path_title="" || path_title=$(printf '%q' "$title")
+[ ${#title} = 0 ] && title="--no-title" || title="-t $(printf '%q' "$title")"
+
+[ "$title" != "--no-title" ] && filename="$path_title"
+
+read -p ' Track: ' track
+[ ${#track} = 0 ] && track="--no-track" || track="-n $(printf '%q' "$track")"
+
+read -p ' Year: ' year
+[ ${#year} = 0 ] && year="--no-year" || year="-y $(printf '%q' "$year")"
+
+echo
+
+# Read output details
+[ ${#filename} = 0 ] && read -p ' Output filename: ' new_filename || read -p " Output filename (default is '$visual_title'): " new_filename
+
+[ ${#new_filename} = 0 ] && [ ${#filename} = 0 ] && echo -e '\n Error: Filename is required!' && exit
+
+[ ${#new_filename} != 0 ] && filename=$(printf '%q' "$new_filename")
+filename="${filename}.m4a"
+
+read -p " Path to save (blank for '.'): " path
+[ ${#path} = 0 ] && path="."
+[ ${#path} != 0 ] && path=$(printf '%q' "$path")
+
+echo
+echo
+
+# Prepare the commands and execute them
+yd_cmd="youtube-dl -o $path/$filename -f 140 $link"
+path="${path/\\~/~}"
+ta_cmd="taffy $artist $album $title $track $year $path/$filename"
+
+sh -c "$yd_cmd" && sh -c "$ta_cmd"
+
