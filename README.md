@@ -17,4 +17,5 @@ mv ydm /usr/local/bin
 + taffy
 
 
-Please, keep in notice, that it can be buggy. It would so cool, if you give me some feedback in Issues!
+#### PS:
+Please, keep in notice, that it can be buggy, i've tested it, but who knows what can happend. If you stumble across an issue, please report, also, leave all the ideas and proposals you have!
